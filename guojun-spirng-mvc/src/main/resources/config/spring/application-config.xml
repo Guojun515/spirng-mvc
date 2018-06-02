@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context 
+	   	http://www.springframework.org/schema/context/spring-context-4.3.xsd
+	   	http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/task
+        http://www.springframework.org/schema/task/spring-task-4.3.xsd">
+	<!-- 
+		Spring在使用ContextLoadListener加载application-context.xml或其他名称的xml文件时，能进行数据源和相关事务注解的检查，启动事务特性。
+		若在mvc-context.xml文件中加载是，仅作为普通bean定义加载。
+		所以一个良好的习惯就是，分层配置相关的bean。application-context.xml.xml中配置数据库相关的bean（dao、service等）, 
+		mvc-context中配置mvc相关的bean（controller等）。
+	 -->
+	<context:component-scan base-package="com.jun.**.service,com.jun.**.cache,com.jun.**.aop,com.jun.**.consumer"/>
+	
+	<!-- 
+		AOP动态代理，expose-proxy为true，可以通过AopContext.currentProxy();获取代理类 
+		在application-context.xml设置代理，只能代理当前文件扫描的类，如果是自定义代理，也要加入当前文件扫描
+	-->
+    <aop:aspectj-autoproxy proxy-target-class="true" expose-proxy="true"/>
+    
+    <!-- spring thread pool executor -->           
+    <bean id = "taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+    	<!-- 核心线程数 -->
+    	<property name="corePoolSize" value="5"/>
+    	<!-- 最大线程数 -->
+    	<property name="maxPoolSize" value="20"/>
+    	<!--  允许的空闲时间 -->
+    	<property name="keepAliveSeconds" value="300"/>
+    	<!-- 队列的大小 -->
+    	<property name="queueCapacity" value="20"/>
+    	<!-- 当任务超过最大线程数是的拒绝方法  -->
+    	<property name="rejectedExecutionHandler"> 
+    		<!-- 线程调用运行该任务的 execute 本身 -->
+    		<bean class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy" />
+    	</property>
+    </bean>
+    
+    <!-- 注册静态变量的spring容器 -->
+    <bean class="com.jun.common.handler.SpringContextHolder"/>
+    
+    <!-- 基于@Async调用中的异常处理机制 -->
+    <bean id="myAsyncExceptionHandler" class="com.jun.common.async.MyAsyncExceptionHandler"/>
+    <task:executor id="myExecutor" pool-size="10"/>
+    <task:annotation-driven exception-handler="myAsyncExceptionHandler" executor="myExecutor"/>
+</beans>

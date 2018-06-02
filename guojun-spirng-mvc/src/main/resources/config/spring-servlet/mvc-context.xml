@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context 
+	   	http://www.springframework.org/schema/context/spring-context-4.3.xsd
+	   	http://www.springframework.org/schema/mvc
+	   	http://www.springframework.org/schema/mvc/spring-mvc-4.3.xsd
+	   	http://www.springframework.org/schema/aop
+        http://www.springframework.org/schema/aop/spring-aop-4.3.xsd">
+
+	<!-- 注解扫描 , 这边扫描service包的话，会另事务不起作用 -->
+	<context:component-scan base-package="com.jun.**.controller,com.jun.**.handler,controller"/>
+	
+	<!-- 注册handler -->
+	<!-- 
+		1、<mvc:annotation-driven /> 是一种简写形式，完全可以手动配置替代这种简写形式，简写形式可以让初学都快速应用默认配置方案。
+		2、<mvc:annotation-driven /> 会自动注册DefaultAnnotationHandlerMapping与AnnotationMethodHandlerAdapter 两个bean,
+		3、是spring MVC为@Controllers分发请求所必须的。 并提供了：数据绑定支持，@NumberFormatannotation支持，@DateTimeFormat支持，@Valid支持，
+		      读写XML的支持（JAXB），读写JSON的支持（Jackson）。 后面，我们处理响应ajax请求时，就使用到了对json的支持。
+		4、后面，对action写JUnit单元测试时，要从spring IOC容器中取DefaultAnnotationHandlerMapping与AnnotationMethodHandlerAdapter 两个bean，
+		      来完成测试，取的时候要知道是<mvc:annotation-driven />这一句注册的这两个bean。
+ 		5、<context:annotation-config> declares support for general annotations such as @Required, @Autowired, 
+ 		  @PostConstruct, and so on.
+		6、<mvc:annotation-driven /> is actually rather pointless. It declares explicit support for 
+		  annotation-driven MVC controllers (i.e.@RequestMapping, @Controller, etc), even though support 
+		  for those is the default behaviour.
+		7、My advice is to always declare <context:annotation-config>, but don't bother with <mvc:annotation-driven /> 
+		  unless you want JSON support via Jackson.
+	 -->
+	<mvc:annotation-driven>
+		<mvc:message-converters>
+			<!-- @ResponseBody乱码问题，将StringHttpMessageConverter的默认编码设为UTF-8 -->
+			<bean class = "org.springframework.http.converter.StringHttpMessageConverter">
+				<property name="defaultCharset" value="UTF-8"/>
+			</bean>
+			<!-- 使用fastjson转换json -->
+			<bean class="com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter">
+				<property name="charset" value="UTF-8"/>
+				<property name="supportedMediaTypes">
+					<list>
+						<value>application/json;charset=UTF-8</value>
+						<value>text/json;charset=UTF-8</value>
+						<value>text/html;charset=UTF-8</value>
+					</list>
+				</property>
+				<property name="features">
+					<list>
+						<!-- 输出key时是否使用双引号 -->
+			           	<value>QuoteFieldNames</value>
+			           	
+			           	<!-- 是否输出值为null的字段 -->
+			           	<!-- <value>WriteMapNullValue</value> -->
+			           	
+			           	<!-- 数值字段如果为null,输出为0,而非null -->
+			           	<value>WriteNullNumberAsZero</value>
+			           	
+			           	<!-- List字段如果为null,输出为[],而非null -->
+			           	<value>WriteNullListAsEmpty</value>
+			           	
+			           	<!-- 字符类型字段如果为null,输出为"",而非null -->
+			           	<value>WriteNullStringAsEmpty</value>
+			           	
+			           	<!-- Boolean字段如果为null,输出为false,而非null -->
+			           	<value>WriteNullBooleanAsFalse</value>
+			           	
+			           	<!-- null String不输出  -->
+			           	<value>WriteNullStringAsEmpty</value>
+			           	
+			           	<!-- null String也要输出  -->
+			           	<!-- <value>WriteMapNullValue</value> -->
+			
+			           	<!-- Date的日期转换器 -->
+			           	<value>WriteDateUseDateFormat</value>
+					</list>
+				</property>
+			</bean>
+		</mvc:message-converters>
+	</mvc:annotation-driven>
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/>
+			<mvc:exclude-mapping path="/lib/**"/>
+			<mvc:exclude-mapping path="/resources/**"/>
+			<bean class="com.jun.common.intercept.spring.DtoTokenInterceptor"/>
+		</mvc:interceptor>	
+	</mvc:interceptors>
+	
+	<!-- 允许对静态资源文件的访问 -->
+	<mvc:resources location="/lib/" mapping="/lib/**" />
+	<mvc:resources location="/resources/" mapping="/resources/**" />
+	<mvc:default-servlet-handler/>
+	
+	<!-- freemarker -->
+	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath" value="/view"/>
+		<property name="defaultEncoding" value="UTF-8"/>
+		<property name="freemarkerSettings">
+			<props>
+				<prop key="template_update_delay">1</prop>
+				<prop key="locale">zh_CN</prop>
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="date_format">yyyy-MM-dd</prop>
+				<prop key="number_format">#.##</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- freemark解析器 -->
+	<bean id="freeMarkViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+		<property name="cache" value="true"/>
+		<property name="prefix" value=""/><!-- 上面已经配了，这里就不用配啦 -->
+		<property name="suffix" value=".html"/>
+		<property name="contentType" value="text/html;charset=UTF-8"/>
+		<property name="allowSessionOverride" value="true"/>
+		<property name="allowRequestOverride" value="true"/>
+		<property name="exposeSpringMacroHelpers" value="true"/>
+		<property name="exposeRequestAttributes" value="true"/>
+		<property name="exposeSessionAttributes" value="true"/>
+		<property name="requestContextAttribute" value="request"/>
+	</bean>
+
+	<!-- jsp视图解析器 -->
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/view"></property>
+		<property name="suffix" value=".jsp"></property>
+	</bean>
+	
+</beans>
