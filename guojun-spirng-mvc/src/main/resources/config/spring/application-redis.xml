@@ -55,12 +55,12 @@
     	<property name="keyPre" value="guojun:cache"/>
     </bean>
     
-    <!-- 使用redis管理session -->
+    <!-- 使用redis管理session (Redis和Session必须写在这些文件的其中一个上) -->
     <bean class="org.springframework.session.data.redis.config.annotation.web.http.RedisHttpSessionConfiguration">
     	<property name="maxInactiveIntervalInSeconds" value="3600"></property>
     </bean>
     
-    <!-- spring 初始化缓存监听器 (Redis和Session必须写在这些文件的其中一个上)-->
+    <!-- spring 初始化缓存监听器 -->
     <bean class="com.jun.common.cache.listener.CacheInitApplicationListener">
     	<property name="taskExecutor" ref="taskExecutor"/>
     </bean>
