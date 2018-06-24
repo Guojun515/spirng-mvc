@@ -41,12 +41,12 @@
 			password-parameter： 密码的请求字段 默认为password  
 			其他：参考https://blog.csdn.net/yin380697242/article/details/51893397
 		 -->
-		<form-login login-page="/user/gotoLogin" login-processing-url="/user/doLogin" 
+		<form-login login-page="/sys/gotoLogin" login-processing-url="/user/doLogin" 
 			authentication-failure-handler-ref="loginAuthenticationFailureHandler"
 			authentication-success-handler-ref="loginAuthenticationSuccesssHandler"/>
 			
 		<!-- 登录退出，如果开启了csrf拦截必须用post方式请求 -->
-		<logout logout-url="/user/logout" logout-success-url="/user/gotoLogin"/>
+		<logout logout-url="/user/logout" logout-success-url="/sys/gotoLoginout"/>
 		
 		<!-- 自定义拦截器，登录与全新验证 -->
 		<custom-filter ref="myFilter" after="FILTER_SECURITY_INTERCEPTOR"/>	

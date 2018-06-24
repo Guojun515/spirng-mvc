@@ -45,15 +45,15 @@
 		</encoder>
 	</appender>
 
-	<logger name="org.codingpedia" additivity="false">
-		<level value="DEBUG" />
+	<logger name="com.jun.common.rocketmq.consumer.service.impl.AbstractPushConsumerConcurrently" additivity="false">
+		<level value="ERROR" />
 		<appender-ref ref="dailyRollingFileAppender" />
 		<appender-ref ref="minuteRollingFileAppender" />
 		<appender-ref ref="consoleAppender" />
 	</logger>
 
 	<root>
-		<level value="DEBUG" />
+		<level value="DEBBUG" />
 		<appender-ref ref="consoleAppender" />
 	</root>
 </configuration>

@@ -60,8 +60,8 @@
     	<property name="maxInactiveIntervalInSeconds" value="3600"></property>
     </bean>
     
-    <!-- spring 初始化缓存监听器 -->
-    <bean class="com.jun.common.cache.listener.CacheInitApplicationListener">
+    <!-- spring 初始化缓存 -->
+    <bean class="com.jun.common.cache.init.CacheInitServiceImpl">
     	<property name="taskExecutor" ref="taskExecutor"/>
     </bean>
     

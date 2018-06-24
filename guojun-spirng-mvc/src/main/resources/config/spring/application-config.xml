@@ -50,4 +50,7 @@
     <bean id="myAsyncExceptionHandler" class="com.jun.common.async.MyAsyncExceptionHandler"/>
     <task:executor id="myExecutor" pool-size="10"/>
     <task:annotation-driven exception-handler="myAsyncExceptionHandler" executor="myExecutor"/>
+    
+    <!-- 程序启动后进行监听 -->
+    <bean id = "myApplicationListener" class="com.jun.common.init.listener.MyApplicationListener"/>
 </beans>

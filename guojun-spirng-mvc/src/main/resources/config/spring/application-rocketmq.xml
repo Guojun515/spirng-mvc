@@ -26,7 +26,8 @@
 	</bean> -->
 	<context:property-placeholder location="classpath:properties/rocketmq.properties" ignore-unresolvable="true"/>
 	
-	<bean class="com.jun.common.rocketmq.consumer.ConsumerStartup">
+	<!-- 启动消费 -->
+	<bean class="com.jun.common.rocketmq.consumer.init.ConsumerInitServiceImpl">
 		<property name="taskExecutor" ref="taskExecutor"/>
 	</bean>
 </beans>

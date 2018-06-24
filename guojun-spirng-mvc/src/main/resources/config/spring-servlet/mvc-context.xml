@@ -76,9 +76,19 @@
 		</mvc:interceptor>	
 	</mvc:interceptors>
 	
+	<!-- 接口跨域配置 --> 
+	<!-- 
+	<mvc:cors>  
+	    <mvc:mapping path="/**"  
+	                 allowed-origins="http://localhost:3000/"  
+	                 allowed-methods="POST, GET, OPTIONS, DELETE, PUT"  
+	                 allowed-headers="Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With"  
+	                 allow-credentials="true"
+	                 exposed-headers="Set-Cookie" />  
+	</mvc:cors> 
+	-->  
+	
 	<!-- 允许对静态资源文件的访问 -->
-	<mvc:resources location="/lib/" mapping="/lib/**" />
-	<mvc:resources location="/resources/" mapping="/resources/**" />
 	<mvc:default-servlet-handler/>
 	
 	<!-- freemarker -->
