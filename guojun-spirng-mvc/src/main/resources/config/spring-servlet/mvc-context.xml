@@ -76,6 +76,12 @@
 		</mvc:interceptor>	
 	</mvc:interceptors>
 	
+	<!-- 允许对静态资源文件的访问 -->
+	<mvc:default-servlet-handler/>
+	
+	<!-- 页面路径(解决集群的时候nginx找不到路径问题) -->
+	<import resource="mvc-view-controllers.xml"/>
+	
 	<!-- 接口跨域配置 --> 
 	<!-- 
 	<mvc:cors>  
@@ -88,11 +94,8 @@
 	</mvc:cors> 
 	-->  
 	
-	<!-- 允许对静态资源文件的访问 -->
-	<mvc:default-servlet-handler/>
-	
 	<!-- freemarker -->
-	<bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+	<!-- <bean id="freeMarkerConfigurer" class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
 		<property name="templateLoaderPath" value="/view"/>
 		<property name="defaultEncoding" value="UTF-8"/>
 		<property name="freemarkerSettings">
@@ -104,12 +107,12 @@
 				<prop key="number_format">#.##</prop>
 			</props>
 		</property>
-	</bean>
+	</bean> -->
 	
 	<!-- freemark解析器 -->
-	<bean id="freeMarkViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+	<!-- <bean id="freeMarkViewResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
 		<property name="cache" value="true"/>
-		<property name="prefix" value=""/><!-- 上面已经配了，这里就不用配啦 -->
+		<property name="prefix" value=""/>上面已经配了，这里就不用配啦
 		<property name="suffix" value=".html"/>
 		<property name="contentType" value="text/html;charset=UTF-8"/>
 		<property name="allowSessionOverride" value="true"/>
@@ -118,12 +121,12 @@
 		<property name="exposeRequestAttributes" value="true"/>
 		<property name="exposeSessionAttributes" value="true"/>
 		<property name="requestContextAttribute" value="request"/>
-	</bean>
+	</bean> -->
 
 	<!-- jsp视图解析器 -->
-	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	<!-- <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/view"></property>
 		<property name="suffix" value=".jsp"></property>
-	</bean>
+	</bean> -->
 	
 </beans>

@@ -53,7 +53,7 @@
 	</logger>
 
 	<root>
-		<level value="DEBBUG" />
+		<level value="ERROR" />
 		<appender-ref ref="consoleAppender" />
 	</root>
 </configuration>
