@@ -1,0 +1,18 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jun.sys.mapper.FunctionRoleMapper">
+
+	<!-- 获取资源对应的角色权限,返回Map集合,用作权限验证 -->
+	<select id="queryAllRFunctionRoles"  resultType="map">
+		SELECT
+			f.function_url,
+			r.role_name
+		FROM
+			sys_function f
+		JOIN sys_role_resources rr ON rr.resource_id = f.resource_id
+		JOIN sys_role r ON rr.role_id = r.role_id	
+	</select>
+
+</mapper>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+	xmlns:beans="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+                        http://www.springframework.org/schema/security 
+                        http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+	
+	<!-- 
+		学习参考：http://www.importnew.com/20612.html
+		官方文档：https://springcloud.cc/spring-security-zhcn.html
+		学习人：Guojun
+		时间：2018-03-27
+	 -->
+	
+	<!-- 不需要拦截的URL -->
+	<http security="none" pattern="/lib/**"/>
+	<http security="none" pattern="/resources/**"/>
+	<http security="none" pattern="/user/gotoLogin"/>
+	
+	<!-- 
+		use-expressions:它表示你即将打开Spring Security 的表达式语言支持， 那么拦截的 URL 的 access 属性的值要求为符合这个语言格式，
+						那么这个格式是什么呢，比如说需要某种角色才能访问，必须写成 hasRole('xxxx')
+		<intercept-url pattern="/**" access="hasRole('ROLE_ADMIN')"/>
+	 -->
+	<http use-expressions="true">
+		<!-- csrf拦截，排除某些URL不需要拦截（暂时关闭） -->
+		<csrf disabled="true" request-matcher-ref="csrfSecuerityRequest"/>
+		
+		<!-- 没有权限 处理 -->
+		<access-denied-handler ref="accessDeniedHandler"/>
+        
+		<!-- 
+			login-page：登录的页面，如果开启了csrf拦截必须用post方式请求
+			login-processing-url： 登录请求拦截的url,也就是form表单提交时指定的action 
+			authentication-failure-handler-ref： 指向一个AuthenticationFailureHandler用于处理失败的认证请求
+			authentication-success-handler-ref： 指向一个AuthenticationSuccessHandler用于处理认证成功的请求,
+											           不能和default-target-url还有always-use-default-target同时使用
+			username-parameter： 用户名的请求字段 默认为userName 
+			password-parameter： 密码的请求字段 默认为password  
+			其他：参考https://blog.csdn.net/yin380697242/article/details/51893397
+		 -->
+		<form-login login-page="/sys/gotoLogin" login-processing-url="/user/doLogin" 
+			authentication-failure-handler-ref="loginAuthenticationFailureHandler"
+			authentication-success-handler-ref="loginAuthenticationSuccesssHandler"/>
+			
+		<!-- 登录退出，如果开启了csrf拦截必须用post方式请求 -->
+		<logout logout-url="/user/logout" logout-success-url="/sys/gotoLoginout"/>
+		
+		<!-- 自定义拦截器，登录与全新验证 -->
+		<custom-filter ref="myFilter" after="FILTER_SECURITY_INTERCEPTOR"/>	
+	</http>
+	
+	<!-- 登录失败的处理 -->
+	<beans:bean id = "loginAuthenticationFailureHandler" class="com.jun.security.LoginAuthenticationFailureHandler"/>
+	
+	<!-- 登录成功的处理 -->
+	<beans:bean id = "loginAuthenticationSuccesssHandler" class="com.jun.security.LoginAuthenticationSuccesssHandler"/>
+	
+	<!-- 没有权限的处理 -->
+	<beans:bean id = "accessDeniedHandler" class="com.jun.security.MyAccessDeniedHandler"/>
+	
+	<!-- 自定义拦截器 -->
+	<beans:bean id="myFilter" class="com.jun.security.MyFilterSecurityInterceptor">
+		<beans:property name="authenticationManager" ref="authenticationManager"/>
+		<beans:property name="securityMetadataSource" ref="securityMetadataSource"/>
+		<beans:property name="accessDecisionManager" ref="accessDecisionManager"/>
+	</beans:bean>
+	
+	<!-- 
+		提供用户验证信息
+		流程：AuthenticationProcessingFilter→AuthenticationManager→ProvideManager→ProvideManager→myUserServiceDetail
+	 -->
+	<authentication-manager alias="authenticationManager">
+		<authentication-provider user-service-ref="myUserServiceDetail">
+			<password-encoder ref="passwordEncoder"></password-encoder>
+		</authentication-provider>
+	</authentication-manager>
+	
+	<!-- 密码加密的方式 -->
+	<beans:bean id="passwordEncoder" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder"/>
+	
+	<!-- 获取用户信息 ，供authenticationProvider使用 -->
+	<beans:bean id="myUserServiceDetail" class="com.jun.security.MyUserDetailsServicesImpl"/>
+	
+	<!-- 加载资源与权限的全部对应关系 -->
+	<beans:bean id="securityMetadataSource" class="com.jun.security.MyInvocationSecurityMetadataSource"/>
+	
+	<!--  授权器，对登录的用户的权限信息、资源，获取资源所有权限来根据不同的授权策略判断用户是否有权限访问资源  -->
+	<beans:bean id="accessDecisionManager" class="com.jun.security.MyAccessDecisionManager"/>
+	
+	<!-- 排除某系URL不进行csrf拦截 -->
+	<beans:bean id="csrfSecuerityRequest" class="com.jun.security.CsrfSecurityRequestMatcher">
+		<beans:property name="excludeURls">
+			<beans:list>
+				<beans:value>/user/doLogin</beans:value>
+				<beans:value>/user/logout</beans:value>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+	
+</beans:beans>

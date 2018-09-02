@@ -1,0 +1,57 @@
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jun.quartz.mapper.JobInfoMapper">
+	<resultMap id="BaseResultMap" type="com.jun.quartz.model.JobInfo">
+		<result column="JOB_NAME" property="jobName" jdbcType="VARCHAR" />
+		<result column="JOB_GROUP" property="groupName"  jdbcType="VARCHAR"/>
+		<result column="DESCRIPTION" property="description"  jdbcType="VARCHAR"/>
+		<result column="JOB_CLASS_NAME" property="jobClassName"  jdbcType="VARCHAR"/>
+		<result column="TRIGGER_NAME" property="triggerName"  jdbcType="VARCHAR"/>
+		<result column="PREV_FIRE_TIME" property="prevFireTime"  jdbcType="TIMESTAMP"/>
+		<result column="NEXT_FIRE_TIME" property="nextFireTime"  jdbcType="TIMESTAMP"/>
+		<result column="START_TIME" property="startDate"  jdbcType="TIMESTAMP"/>
+		<result column="END_TIME" property="endDate"  jdbcType="TIMESTAMP"/>
+		<result column="TRIGGER_STATE" property="triggerState"  jdbcType="VARCHAR"/>
+		<result column="TRIGGER_TYPE" property="triggerType"  jdbcType="VARCHAR"/>
+	</resultMap>
+
+	<select id="queryAllJobDetails" parameterType="com.jun.quartz.model.JobInfo" resultMap="BaseResultMap">
+		SELECT
+			d.JOB_NAME,
+			d.JOB_GROUP,
+			d.DESCRIPTION,
+			d.JOB_CLASS_NAME,
+			t.TRIGGER_NAME,
+			t.TRIGGER_STATE,
+			t.TRIGGER_TYPE,
+			FROM_UNIXTIME(t.NEXT_FIRE_TIME/1000) NEXT_FIRE_TIME,
+			FROM_UNIXTIME(t.PREV_FIRE_TIME/1000) PREV_FIRE_TIME,
+			FROM_UNIXTIME(t.START_TIME/1000) START_TIME,
+			FROM_UNIXTIME(t.END_TIME/1000) END_TIME
+		FROM qrtz_job_details d
+		JOIN qrtz_triggers t ON d.JOB_NAME = t.JOB_NAME AND d.JOB_GROUP = t.JOB_GROUP
+		<where>
+			<if test="jobName != null">
+				AND d.JOB_NAME LIKE CONCAT("%",${jobName, jdbcType="VARCHAR"}, '%')
+			</if>
+			<if test="groupName != null">
+				AND d.JOB_GROUP LIKE CONCAT("%",${groupName, jdbcType="VARCHAR"}, '%')
+			</if>
+			<if test="jobClassName != null">
+				AND d.JOB_CLASS_NAME LIKE CONCAT("%",${jobClassName, jdbcType="VARCHAR"}, '%')
+			</if>
+			<if test="triggerName != null">
+				AND d.TRIGGER_NAME LIKE CONCAT("%",${triggerName, jdbcType="VARCHAR"}, '%')
+			</if>
+			<if test="triggerState != null">
+				AND d.TRIGGER_STATE = ${triggerState, jdbcType="VARCHAR"}
+			</if>
+			<if test="triggerType != null">
+				AND d.TRIGGER_TYPE = ${triggerType, jdbcType="VARCHAR"}
+			</if>
+		</where>
+		ORDER BY d.JOB_NAME,d.JOB_GROUP,t.TRIGGER_NAME,d.JOB_CLASS_NAME	
+	</select>
+</mapper>

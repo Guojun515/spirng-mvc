@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context 
+	   	http://www.springframework.org/schema/context/spring-context-4.3.xsd
+	   	http://www.springframework.org/schema/tx 
+        http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+        
+	<!-- 加载配置文件 -->
+	<context:property-placeholder location="classpath:properties/database.properties" ignore-unresolvable="true"/>
+    
+	<!-- druid 数据库连接池 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource"
+		init-method="init" destroy-method="close">
+		<!-- 数据库用户名称 -->
+		<property name="username" value="${jdbc.username}" />
+		<!-- 数据库密码 -->
+		<property name="password" value="${jdbc.password}" />
+		<!-- 驱动名称 -->
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<!-- JDBC连接串 -->
+		<property name="url" value="${jdbc.url}" />
+		<!-- 连接池最大使用连接数量 -->
+		<property name="maxActive" value="${jdbc.maxActive}" />
+		<!-- 初始化大小 -->
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="${jdbc.maxWait}" />
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="${jdbc.minIdle}" />
+		<!-- 超出出连接的检测时间间隔 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+		<!-- 最小逐出时间 -->
+		<property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+		<!-- 测试有效用的SQL Query -->
+		<property name="validationQuery" value="SELECT 'x'" />
+		<!-- 连接空闲时测试是否有效 -->
+		<property name="testWhileIdle" value="true" />
+		<!-- 获取连接时测试是否有效 -->
+		<property name="testOnBorrow" value="false" />
+		<!-- 归还连接时是否测试有效 -->
+		<property name="testOnReturn" value="false" />
+	</bean>
+
+	<!-- mybatis 配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="mapperLocations" value="classpath:/**/*Mapper.xml" />
+		<property name="plugins">
+			<array>
+				
+				<!-- 自定义拦截器：给返回结果的token赋值 -->
+				<bean class="com.jun.common.intercept.mybatis.DtoTokenBuildInterceptor"/>
+				
+				<!-- 分页插件(5.0)配置 https://pagehelper.github.io/docs/howtouse/ -->
+				<bean class="com.github.pagehelper.PageInterceptor">
+					<property name="properties">
+						<value>
+							helperDialect = mysql
+							reasonable = true
+						</value>
+					</property>
+				</bean>
+			</array>
+		</property>
+		<property name="configLocation" value="classpath:config/mybatis/mybatis-setting.xml" />
+	</bean>
+	
+	<!-- sqlSession配置 -->
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	
+	<!-- 自动扫描mybatis Mapper(4.0) https://mapperhelper.github.io/docs/1.integration/ -->
+	<bean class="tk.mybatis.spring.mapper.MapperScannerConfigurer">
+    	<property name="basePackage" value="com.jun.**.mapper"/>
+    	<property name="markerInterface" value="tk.mybatis.mapper.common.Mapper"/>
+	</bean>
+	
+	<!-- 声明式事务 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	<tx:annotation-driven transaction-manager="transactionManager" proxy-target-class="true" />
+	
+</beans>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+		http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+		http://www.springframework.org/schema/context 
+	   	http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+
+	<!-- 扫描rocketmq包 -->
+	<context:component-scan base-package="com.jun.common.rocketmq.*" />
+	
+	<!-- 
+		@Value("${xxx}"),可以简化成<context:property-placeholder>
+		注意：1、如果有多个地方通过这样的方式引入了properties配置文件，使用@value的时候不能使用默认值，如果要使用，需要设置order属性为1,
+		            否则会受到其他首先加载的配置文件的影响
+			2、如配置了多个PropertyPlaceholderConfigurer，则需设置ignoreUnresolvablePlaceholders为true
+	-->
+	<!-- <bean class="org.springframework.beans.factory.config.PreferencesPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:properties/rocketmq.properties</value>
+			</list>
+		</property>
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+	</bean> -->
+	<context:property-placeholder location="classpath:properties/rocketmq.properties" ignore-unresolvable="true"/>
+	
+	<!-- 启动消费 -->
+	<bean class="com.jun.common.rocketmq.consumer.init.ConsumerInitServiceImpl">
+		<property name="taskExecutor" ref="taskExecutor"/>
+	</bean>
+</beans>
