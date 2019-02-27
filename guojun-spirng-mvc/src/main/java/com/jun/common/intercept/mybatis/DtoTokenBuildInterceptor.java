@@ -28,7 +28,7 @@ import com.jun.common.utils.dto.DtoDataTokenUtils;
  * @Description 给返回的实体类设置token属性
  * @author Guojun
  * @Date 2018年4月5日 下午2:12:12
- *
+ * 注解：@Signature method的值对应type类里边的方法，args的值对应的是method的参数
  */
 @Intercepts({
 	@Signature(type = Executor.class, method = "query", args = {MappedStatement.class, Object.class, RowBounds.class, ResultHandler.class}),
